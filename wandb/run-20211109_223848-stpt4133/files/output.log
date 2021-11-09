@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "main.py", line 23, in <module>
+    parser.run()
+  File "/home/younesbelkada/Travail/MVA/Recvis/Assignment3/recvis21_a3/utils/parser.py", line 41, in run
+    trainer.run()
+  File "/home/younesbelkada/Travail/MVA/Recvis/Assignment3/recvis21_a3/utils/trainer.py", line 53, in run
+    self.train()
+  File "/home/younesbelkada/Travail/MVA/Recvis/Assignment3/recvis21_a3/utils/trainer.py", line 26, in train
+    if batch_idx % args.log_interval == 0:
+NameError: name 'args' is not defined
