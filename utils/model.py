@@ -43,7 +43,12 @@ class Resnet18(nn.Module):
         for param in self.backbone.parameters():
             param.requires_grad = False
         self.backbone.requires_grad = True
-        self.backbone.fc = nn.Linear(512, nclasses)
+        self.backbone.fc = nn.Sequential(
+          nn.Linear(512, 256),
+          nn.BatchNorm1d(256),
+          nn.Dropout(0.4),
+          nn.Linear(256, nclasses)
+        )
         
     def forward(self, x):
         return self.backbone(x)
