@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+import torchvision.models as models
+
 nclasses = 20 
 
 class Net(nn.Module):
@@ -20,3 +22,28 @@ class Net(nn.Module):
         x = x.view(-1, 320)
         x = F.relu(self.fc1(x))
         return self.fc2(x)
+
+class VGG16_birds(nn.Module):
+    def __init__(self):
+        super(VGG16_birds, self).__init__()
+        self.backbone = torch.hub.load('pytorch/vision:v0.10.0', 'vgg16', pretrained=True)
+        for param in self.backbone.parameters():
+            param.requires_grad = False
+        self.backbone.classifier = nn.Sequential( 
+            nn.Linear(4098, nclasses)
+        )
+    def forward(self, x):
+        return self.backbone(x)
+
+
+class Resnet18(nn.Module):
+    def __init__(self):
+        super(Resnet18, self).__init__()
+        self.backbone = models.resnet18(pretrained=True)
+        for param in self.backbone.parameters():
+            param.requires_grad = False
+        self.backbone.requires_grad = True
+        self.backbone.fc = nn.Linear(512, nclasses)
+        
+    def forward(self, x):
+        return self.backbone(x)

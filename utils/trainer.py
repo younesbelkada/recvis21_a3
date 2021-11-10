@@ -4,7 +4,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 
 class Trainer():
-    def __init__(self, model, train_loader, val_loader, optimizer, epochs, use_cuda, log_intervals):
+    def __init__(self, model, train_loader, val_loader, optimizer, epochs, use_cuda, log_intervals, path_out):
         self.model = model
         self.train_loader = train_loader
         self.val_loader = val_loader
@@ -12,6 +12,7 @@ class Trainer():
         self.use_cuda = use_cuda
         self.epochs = epochs
         self.log_intervals = log_intervals
+        self.path_out = path_out
 
     def train(self, epoch):
         val_loss = 1000
@@ -32,8 +33,8 @@ class Trainer():
                     100. * batch_idx / len(self.train_loader), loss.data.item()))
     def validation(self):
         self.model.eval()
-        validation_loss = 0
         correct = 0
+        validation_loss = 0
         for data, target in self.val_loader:
             if self.use_cuda:
                 data, target = data.cuda(), target.cuda()
@@ -49,12 +50,16 @@ class Trainer():
         print('\nValidation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
             validation_loss, correct, len(self.val_loader.dataset),
             100. * correct / len(self.val_loader.dataset)))
+        return validation_loss
 
 
     def run(self):
+        val_loss = 1000
         for epoch in range(1, self.epochs + 1):
             self.train(epoch)
-            self.validation()
-            model_file = os.path.join(args.experiment, 'model_' + str(epoch) + '.pth')
-            torch.save(self.model.state_dict(), model_file)
-            print('Saved model to ' + model_file + '. You can run `python evaluate.py --model ' + model_file + '` to generate the Kaggle formatted csv file\n')
+            new_val_loss = self.validation()
+            model_file = os.path.join(self.path_out, self.model.__class__.__name__ + '.pth')
+            if new_val_loss < val_loss:
+                val_loss = new_val_loss
+                torch.save(self.model.state_dict(), model_file)
+                print('Saved model to ' + model_file + '. You can run `python evaluate.py --model ' + model_file + '` to generate the Kaggle formatted csv file\n')
