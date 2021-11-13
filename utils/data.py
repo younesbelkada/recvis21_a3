@@ -3,6 +3,7 @@ import os
 
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as F
+from PIL import Image
 
 class SquarePad:
     def __call__(self, image):
@@ -18,9 +19,10 @@ class SquarePad:
 # the training set
 data_transforms = transforms.Compose([
     SquarePad(),
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
+    transforms.Resize((454, 454)),
     transforms.RandomVerticalFlip(p=0.5),
+    transforms.CenterCrop(227),
+    transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                  std=[0.229, 0.224, 0.225])
 ])

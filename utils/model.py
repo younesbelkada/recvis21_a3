@@ -26,23 +26,36 @@ class Net(nn.Module):
 class VGG16_birds(nn.Module):
     def __init__(self):
         super(VGG16_birds, self).__init__()
-        self.backbone = torch.hub.load('pytorch/vision:v0.10.0', 'vgg16', pretrained=True)
-        for param in self.backbone.parameters():
-            param.requires_grad = False
+        self.backbone = models.vgg16(pretrained=True)
+        #for param in self.backbone.parameters():
+        #    param.requires_grad = False
         self.backbone.classifier = nn.Sequential( 
             nn.Linear(4098, nclasses)
         )
     def forward(self, x):
         return self.backbone(x)
 
+class AlexNet_birds(nn.Module):
+  def __init__(self):
+        super(AlexNet_birds, self).__init__()
+        self.backbone = models.alexnet(pretrained=True)
+        self.backbone.classifier = nn.Sequential( 
+            nn.Linear(9216, 4096),
+            nn.BatchNorm1d(4096),
+            nn.Dropout(0.4),
+            nn.Linear(4096, nclasses)
+        )
+        #print(self.backbone)
+  def forward(self, x):
+    return self.backbone(x)
 
-class Resnet18(nn.Module):
+class Resnet34(nn.Module):
     def __init__(self):
-        super(Resnet18, self).__init__()
-        self.backbone = models.resnet18(pretrained=True)
+        super(Resnet34, self).__init__()
+        self.backbone = models.resnet34(pretrained=True)
         for param in self.backbone.parameters():
             param.requires_grad = False
-        self.backbone.requires_grad = True
+        #self.backbone.requires_grad = True
         self.backbone.fc = nn.Sequential(
           nn.Linear(512, 256),
           nn.BatchNorm1d(256),
@@ -52,3 +65,4 @@ class Resnet18(nn.Module):
         
     def forward(self, x):
         return self.backbone(x)
+

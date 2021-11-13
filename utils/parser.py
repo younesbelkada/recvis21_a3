@@ -9,7 +9,7 @@ import torch.optim as optim
 from torchvision import datasets
 
 from utils.data import data_transforms, pil_loader
-from utils.model import Net, VGG16_birds, Resnet18
+from utils.model import Net, VGG16_birds, Resnet18, AlexNet_birds
 from utils.trainer import Trainer
 
 class Parser():
@@ -27,8 +27,10 @@ class Parser():
         model_name = self.config['Model']['name']
         if model_name == 'Baseline':
             model = Net()
-        else:
+        elif model_name == 'Resnet18':
             model = Resnet18()
+        elif model_name == 'Alexnet':
+            model = AlexNet_birds()
 
         if self.use_cuda:
             model = model.cuda()
@@ -39,7 +41,8 @@ class Parser():
         self.model = self.get_model()
     
     def run(self):
-        self.optimizer = optim.SGD(filter(lambda p: p.requires_grad, self.model.parameters()), lr=float(self.config['Training']['learning_rate']), momentum=float(self.config['Training']['momentum']))
+        #self.optimizer = optim.SGD(filter(lambda p: p.requires_grad, self.model.parameters()), lr=float(self.config['Training']['learning_rate']), momentum=float(self.config['Training']['momentum']))
+        self.optimizer = optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=float(self.config['Training']['learning_rate']))
         trainer = Trainer(self.model, self.train_loader, self.val_loader, self.optimizer, int(self.config['Training']['epochs']), self.use_cuda, int(self.config['Training']['log_intervals']), self.path_out)
         trainer.run()
     
@@ -57,9 +60,9 @@ class Parser():
             if 'jpg' in f:
                 data = data_transforms(pil_loader(test_dir + '/' + f))
                 data = data.view(1, data.size(0), data.size(1), data.size(2))
-                if use_cuda:
+                if self.use_cuda:
                     data = data.cuda()
-                output = model(data)
+                output = self.model(data)
                 pred = output.data.max(1, keepdim=True)[1]
                 output_file.write("%s,%d\n" % (f[:-4], pred))
 

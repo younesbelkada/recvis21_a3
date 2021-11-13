@@ -46,7 +46,7 @@ class Trainer():
             pred = output.data.max(1, keepdim=True)[1]
             correct += pred.eq(target.data.view_as(pred)).cpu().sum()
 
-        validation_loss /= len(self.val_loader.dataset)
+        validation_loss /= 100. * correct / len(self.val_loader.dataset)
         print('\nValidation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
             validation_loss, correct, len(self.val_loader.dataset),
             100. * correct / len(self.val_loader.dataset)))
