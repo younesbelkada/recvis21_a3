@@ -26,7 +26,6 @@ class Trainer():
             "optimizer_name": self.optimizer.__class__.__name__
         })
 
-        val_loss = 1000
 
         self.model.train()
         for batch_idx, (data, target) in enumerate(self.train_loader):
@@ -70,7 +69,7 @@ class Trainer():
 
 
     def run(self, wandb=None):
-        val_acc = 1000
+        val_acc = 0
         for epoch in range(1, self.epochs + 1):
             self.train(epoch)
             new_val_acc = self.validation()
