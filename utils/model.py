@@ -53,14 +53,11 @@ class Resnet34(nn.Module):
     def __init__(self):
         super(Resnet34, self).__init__()
         self.backbone = models.resnet34(pretrained=True)
-        for param in self.backbone.parameters():
-            param.requires_grad = False
+        #for param in self.backbone.parameters():
+        #    param.requires_grad = False
         #self.backbone.requires_grad = True
         self.backbone.fc = nn.Sequential(
-          nn.Linear(512, 256),
-          nn.BatchNorm1d(256),
-          nn.Dropout(0.4),
-          nn.Linear(256, nclasses)
+          nn.Linear(512, nclasses)
         )
         
     def forward(self, x):
