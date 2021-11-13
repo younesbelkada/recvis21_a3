@@ -9,7 +9,7 @@ import torch.optim as optim
 from torchvision import datasets
 
 from utils.data import data_transforms, pil_loader
-from utils.model import Net, VGG16_birds, Resnet18, AlexNet_birds
+from utils.model import Net, VGG16_birds, Resnet34, AlexNet_birds
 from utils.trainer import Trainer
 
 class Parser():
@@ -27,8 +27,8 @@ class Parser():
         model_name = self.config['Model']['name']
         if model_name == 'Baseline':
             model = Net()
-        elif model_name == 'Resnet18':
-            model = Resnet18()
+        elif model_name == 'Resnet34':
+            model = Resnet34()
         elif model_name == 'Alexnet':
             model = AlexNet_birds()
 
@@ -36,14 +36,22 @@ class Parser():
             model = model.cuda()
         return model
     def parse(self):
-        self.train_loader = torch.utils.data.DataLoader(datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'train_images'), transform=data_transforms), batch_size=int(self.config['Training']['batch_size']), shuffle=True, num_workers=1)
-        self.val_loader = torch.utils.data.DataLoader(datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'val_images'), transform=data_transforms), batch_size=int(self.config['Training']['batch_size']), shuffle=False, num_workers=1)
+
         self.model = self.get_model()
+        self.learning_rate = float(self.config['Training']['learning_rate'])
+        self.epochs = int(self.config['Training']['epochs'])
+        self.batch_size = int(self.config['Training']['batch_size'])
+        self.optimizer_name = self.config['Training']['optimizer_name']
+        self.train_loader = torch.utils.data.DataLoader(datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'train_images'), transform=data_transforms), batch_size=self.batch_size, shuffle=True, num_workers=1)
+        self.val_loader = torch.utils.data.DataLoader(datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'val_images'), transform=data_transforms), batch_size=self.batch_size, shuffle=False, num_workers=1)
+        
     
     def run(self):
-        #self.optimizer = optim.SGD(filter(lambda p: p.requires_grad, self.model.parameters()), lr=float(self.config['Training']['learning_rate']), momentum=float(self.config['Training']['momentum']))
-        self.optimizer = optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=float(self.config['Training']['learning_rate']))
-        trainer = Trainer(self.model, self.train_loader, self.val_loader, self.optimizer, int(self.config['Training']['epochs']), self.use_cuda, int(self.config['Training']['log_intervals']), self.path_out)
+        if self.optimizer_name == 'sgd':
+            self.optimizer = optim.SGD(filter(lambda p: p.requires_grad, self.model.parameters()), lr=float(self.config['Training']['learning_rate']), momentum=float(self.config['Training']['momentum']))
+        else:
+            self.optimizer = optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=self.learning_rate)
+        trainer = Trainer(self.model, self.train_loader, self.val_loader, self.optimizer, self.epochs, self.use_cuda, int(self.config['Training']['log_intervals']), self.path_out)
         trainer.run()
     
     def run_eval(self):
