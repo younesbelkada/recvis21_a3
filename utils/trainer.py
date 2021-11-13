@@ -4,8 +4,6 @@ import torch.nn as nn
 from torch.autograd import Variable
 import wandb
 
-wandb.init(project="my-test-project", entity="younesbelkada")
-
 class Trainer():
     def __init__(self, model, train_loader, val_loader, optimizer, epochs, use_cuda, log_intervals, path_out):
         self.model = model
@@ -17,19 +15,22 @@ class Trainer():
         self.log_intervals = log_intervals
         self.path_out = path_out
 
-        wandb.config = {
+        
+
+    def train(self, epoch):
+        wandb.init(project="birds-classification", entity="younesbelkada", 
+            config={
             "learning_rate": self.optimizer.param_groups[0]['lr'],
             "epochs": self.epochs,
             "batch_size": self.train_loader.batch_size,
             "optimizer_name": self.optimizer.__class__.__name__
-        }
+        })
 
-    def train(self, epoch):
         val_loss = 1000
 
         self.model.train()
         for batch_idx, (data, target) in enumerate(self.train_loader):
-            wandb.watch(self.model)
+            
             if self.use_cuda:
                 data, target = data.cuda(), target.cuda()
             self.optimizer.zero_grad()
@@ -74,7 +75,7 @@ class Trainer():
             self.train(epoch)
             new_val_acc = self.validation()
             model_file = os.path.join(self.path_out, self.model.__class__.__name__ + '.pth')
-            if new_val_acc < val_acc:
+            if new_val_acc >= val_acc:
                 val_acc = new_val_acc
                 torch.save(self.model.state_dict(), model_file)
                 print('Saved model to ' + model_file + '. You can run `python evaluate.py --model ' + model_file + '` to generate the Kaggle formatted csv file\n')
