@@ -9,7 +9,7 @@ import torch.optim as optim
 from torchvision import datasets
 
 from utils.data import data_transforms, pil_loader
-from utils.model import Net, VGG16_birds, Resnet34, AlexNet_birds
+from utils.model import Net, VGG16_birds, Resnet34, AlexNet_birds, BirdNet
 from utils.trainer import Trainer
 
 class Parser():
@@ -31,6 +31,8 @@ class Parser():
             model = Resnet34()
         elif model_name == 'Alexnet':
             model = AlexNet_birds()
+        elif model_name == 'BirdNet':
+            model = BirdNet()
 
         if self.use_cuda:
             model = model.cuda()
