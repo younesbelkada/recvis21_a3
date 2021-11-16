@@ -71,8 +71,9 @@ class Resnet34(nn.Module):
         #for param in self.backbone.parameters():
         #    param.requires_grad = False
         #self.backbone.requires_grad = True
+        n_feat = self.backbone.fc.in_features
         self.backbone.fc = nn.Sequential(
-          nn.Linear(512, nclasses)
+          nn.Linear(n_feat, nclasses)
         )
         
     def forward(self, x):
@@ -85,8 +86,9 @@ class Resnet50(nn.Module):
         #for param in self.backbone.parameters():
         #    param.requires_grad = False
         #self.backbone.requires_grad = True
+        n_feat = self.backbone.fc.in_features
         self.backbone.fc = nn.Sequential(
-          nn.Linear(2048, nclasses)
+          nn.Linear(n_feat, nclasses)
         )
         
     def forward(self, x):

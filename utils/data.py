@@ -19,8 +19,8 @@ class SquarePad:
 # the training set
 data_transforms = transforms.Compose([
     #SquarePad(),
-    transforms.Resize((224, 224)),
-    transforms.AutoAugment(transforms.AutoAugmentPolicy.IMAGENET),
+    transforms.Resize((224, 224)), # 384 x 384 # take the cropped images # 512,512 + center crop 384
+    transforms.AutoAugment(transforms.AutoAugmentPolicy.IMAGENET), # random flip
     #transforms.RandomCrop(224),
     #transforms.RandomVerticalFlip(p=0.5),
     #transforms.CenterCrop(227),

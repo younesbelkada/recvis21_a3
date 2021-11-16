@@ -47,19 +47,20 @@ class Trainer():
         self.model.eval()
         correct = 0
         validation_loss = 0
-        for data, target in self.val_loader:
-            if self.use_cuda:
-                data, target = data.cuda(), target.cuda()
-            output = self.model(data)
-            # sum up batch loss
-            criterion = torch.nn.CrossEntropyLoss(reduction='mean')
-            validation_loss += criterion(output, target).data.item()
-            # get the index of the max log-probability
-            pred = output.data.max(1, keepdim=True)[1]
-            correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+        with torch.no_grad():
+            for data, target in self.val_loader:
+                if self.use_cuda:
+                    data, target = data.cuda(), target.cuda()
+                output = self.model(data)
+                # sum up batch loss
+                criterion = torch.nn.CrossEntropyLoss(reduction='mean')
+                validation_loss += criterion(output, target).data.item()
+                # get the index of the max log-probability
+                pred = output.data.max(1, keepdim=True)[1]
+                correct += pred.eq(target.data.view_as(pred)).cpu().sum()
 
-        validation_loss /= len(self.val_loader.dataset)
-        val_acc = 100. * correct / len(self.val_loader.dataset)
+            validation_loss /= len(self.val_loader.dataset)
+            val_acc = 100. * correct / len(self.val_loader.dataset)
         
         wandb.log({"val_loss": validation_loss, "val_acc":val_acc})    
         print('\nValidation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(

@@ -68,15 +68,16 @@ class Parser():
 
         output_file = open(output_file, "w")
         output_file.write("Id,Category\n")
-        for f in tqdm(os.listdir(test_dir)):
-            if 'jpg' in f:
-                data = data_transforms_val(pil_loader(test_dir + '/' + f))
-                data = data.view(1, data.size(0), data.size(1), data.size(2))
-                if self.use_cuda:
-                    data = data.cuda()
-                output = self.model(data)
-                pred = output.data.max(1, keepdim=True)[1]
-                output_file.write("%s,%d\n" % (f[:-4], pred))
+        with torch.no_grad():
+            for f in tqdm(os.listdir(test_dir)):
+                if 'jpg' in f:
+                    data = data_transforms_val(pil_loader(test_dir + '/' + f))
+                    data = data.view(1, data.size(0), data.size(1), data.size(2))
+                    if self.use_cuda:
+                        data = data.cuda()
+                    output = self.model(data)
+                    pred = output.data.max(1, keepdim=True)[1]
+                    output_file.write("%s,%d\n" % (f[:-4], pred))
 
         output_file.close()
 
