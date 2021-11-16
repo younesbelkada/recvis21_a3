@@ -18,15 +18,24 @@ class SquarePad:
 # and normalize them to mean = 0 and standard-deviation = 1 based on statistics collected from
 # the training set
 data_transforms = transforms.Compose([
-    SquarePad(),
+    #SquarePad(),
     transforms.Resize((224, 224)),
-    transforms.RandomVerticalFlip(p=0.5),
+    transforms.AutoAugment(transforms.AutoAugmentPolicy.IMAGENET),
+    #transforms.RandomCrop(224),
+    #transforms.RandomVerticalFlip(p=0.5),
     #transforms.CenterCrop(227),
     transforms.ToTensor(),
-    #transforms.Normalize(mean=[0.485, 0.456, 0.406],
-    #                             std=[0.229, 0.224, 0.225])
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225])
 ])
 
+data_transforms_val = transforms.Compose([
+    #SquarePad(),
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225])
+])
 
 def pil_loader(path):
     # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)

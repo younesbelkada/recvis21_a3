@@ -8,8 +8,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets
 
-from utils.data import data_transforms, pil_loader
-from utils.model import Net, VGG16_birds, Resnet34, AlexNet_birds, BirdNet
+from utils.data import data_transforms, data_transforms_val, pil_loader
+from utils.model import Net, VGG16_birds, Resnet34, AlexNet_birds, BirdNet, Resnet50
 from utils.trainer import Trainer
 
 class Parser():
@@ -29,6 +29,8 @@ class Parser():
             model = Net()
         elif model_name == 'Resnet34':
             model = Resnet34()
+        elif model_name == 'Resnet50':
+            model = Resnet50()
         elif model_name == 'Alexnet':
             model = AlexNet_birds()
         elif model_name == 'BirdNet':
@@ -45,7 +47,7 @@ class Parser():
         self.batch_size = int(self.config['Training']['batch_size'])
         self.optimizer_name = self.config['Training']['optimizer_name']
         self.train_loader = torch.utils.data.DataLoader(datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'train_images'), transform=data_transforms), batch_size=self.batch_size, shuffle=True, num_workers=1)
-        self.val_loader = torch.utils.data.DataLoader(datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'val_images'), transform=data_transforms), batch_size=self.batch_size, shuffle=False, num_workers=1)
+        self.val_loader = torch.utils.data.DataLoader(datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'val_images'), transform=data_transforms_val), batch_size=self.batch_size, shuffle=False, num_workers=1)
         
     
     def run(self):
@@ -68,7 +70,7 @@ class Parser():
         output_file.write("Id,Category\n")
         for f in tqdm(os.listdir(test_dir)):
             if 'jpg' in f:
-                data = data_transforms(pil_loader(test_dir + '/' + f))
+                data = data_transforms_val(pil_loader(test_dir + '/' + f))
                 data = data.view(1, data.size(0), data.size(1), data.size(2))
                 if self.use_cuda:
                     data = data.cuda()

@@ -76,6 +76,20 @@ class Resnet34(nn.Module):
         
     def forward(self, x):
         return self.backbone(x)
+  
+class Resnet50(nn.Module):
+    def __init__(self):
+        super(Resnet50, self).__init__()
+        self.backbone = models.resnet50(pretrained=True)
+        #for param in self.backbone.parameters():
+        #    param.requires_grad = False
+        #self.backbone.requires_grad = True
+        self.backbone.fc = nn.Sequential(
+          nn.Linear(2048, nclasses)
+        )
+        
+    def forward(self, x):
+        return self.backbone(x)
 
 class BirdNet(nn.Module):
     def __init__(self):
