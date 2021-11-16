@@ -7,6 +7,7 @@ import torchvision.transforms as transforms
 import torchvision.models as models
 from PIL import Image
 
+torch.manual_seed(0)
 nclasses = 20 
 
 class Patches(nn.Module):
