@@ -10,6 +10,7 @@ from torchvision import datasets
 
 from utils.data import data_transforms, data_transforms_val, pil_loader
 from utils.model import Net, VGG16_birds, Resnet34, AlexNet_birds, BirdNet, Resnet50
+from utils.vit import TransforBirds
 from utils.trainer import Trainer
 
 class Parser():
@@ -35,6 +36,8 @@ class Parser():
             model = AlexNet_birds()
         elif model_name == 'BirdNet':
             model = BirdNet()
+        elif model_name == 'TransforBirds':
+            model = TransforBirds(256, 9, 'conv', self.use_cuda)
 
         if self.use_cuda:
             model = model.cuda()
@@ -48,7 +51,7 @@ class Parser():
         self.optimizer_name = self.config['Training']['optimizer_name']
         self.augment = self.config['Dataset'].getboolean('augment')
         if self.augment:
-            self.train_loader = torch.utils.data.DataLoader(ConcatDataset([datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'train_images'), transform=data_transforms), datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data']+'_yolo','train_images'), transform=data_transforms)]), batch_size=self.batch_size, shuffle=True, num_workers=1)
+            self.train_loader = torch.utils.data.DataLoader(torch.utils.data.ConcatDataset([datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'train_images'), transform=data_transforms), datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data']+'_yolo','train_images'), transform=data_transforms)]), batch_size=self.batch_size, shuffle=True, num_workers=1)
         else:
             self.train_loader = torch.utils.data.DataLoader(datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'train_images'), transform=data_transforms), batch_size=self.batch_size, shuffle=True, num_workers=1)
         self.val_loader = torch.utils.data.DataLoader(datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'val_images'), transform=data_transforms_val), batch_size=self.batch_size, shuffle=False, num_workers=1)
