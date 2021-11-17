@@ -50,7 +50,7 @@ class LinearPatchEncoder(nn.Module):
     def __init__(self, input_size, emb_size):
         super(LinearPatchEncoder, self).__init__()
         self.fc = nn.Sequential(
-            nn.Linear(input_size, emb_size)
+            nn.Linear(input_size, emb_size, biais=False)
         )
     def forward(self, x):
         x = torch.flatten(x, start_dim=1)
