@@ -6,6 +6,8 @@ import torch.nn as nn
 from torch.autograd import Variable
 import torchvision.transforms as transforms
 
+from utils.gan import VGGPerceptualLoss
+
 
 class Trainer():
     def __init__(self, model, train_loader, val_loader, optimizer, epochs, use_cuda, log_intervals, path_out):
@@ -37,11 +39,14 @@ class Trainer():
                 data, target = data.cuda(), target.cuda()
             self.optimizer.zero_grad()
             if self.model.__class__.__name__ == 'BirdsGAN':
-                output = self.model(target.long())
+                output, generated_im = self.model(target.long())
             else:
                 output = self.model(data)
             criterion = torch.nn.CrossEntropyLoss(reduction='mean')
             loss = criterion(output, target)
+            if self.model.__class__.__name__ == 'BirdsGAN':
+                perc_loss = VGGPerceptualLoss()(data, generated_im)
+                loss += perc_loss
             loss.backward()
             wandb.log({"loss": loss.item()})
             self.optimizer.step()
@@ -49,6 +54,7 @@ class Trainer():
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                     epoch, batch_idx * len(data), len(self.train_loader.dataset),
                     100. * batch_idx / len(self.train_loader), loss.data.item()))
+            #break
     def validation(self):
         self.model.eval()
         correct = 0
@@ -78,10 +84,13 @@ class Trainer():
         self.model.eval()
         correct = 0
         validation_loss = 0
+        MEAN = torch.tensor([0.485, 0.456, 0.406])
+        STD = torch.tensor([0.229, 0.224, 0.225])
         with torch.no_grad():
             for data, target in self.val_loader:
                 if self.use_cuda:
                     data, target = data.cuda(), target.cuda()
+                    MEAN, STD = MEAN.cuda(), STD.cuda()
                 output = self.model.generate(target)
                 # sum up batch loss
                 #criterion = torch.nn.CrossEntropyLoss(reduction='mean')
@@ -93,7 +102,7 @@ class Trainer():
                 labels = []
                 for i in range(4):
                     #print(output.shape)
-                    generated_images = (*generated_images, transforms.ToPILImage()(output[i, :, :, :]))
+                    generated_images = (*generated_images, transforms.ToPILImage()(output[i, :, :, :] * STD[:, None, None] + MEAN[:, None, None]))
                     labels.append(target[i].item())
                 break
             #wandb.log({"gen image": wandb.Image(list(generated_images), caption=labels)}) 
