@@ -40,7 +40,7 @@ class Parser():
         elif self.model_name == 'TransforBirds':
             model = TransforBirds(256, 9, 'conv', self.use_cuda)
         elif self.model_name == 'BirdsGAN':
-            model = BirdsGAN(2048, './models/Resnet34/Resnet34.pth', self.use_cuda)
+            model = BirdsGAN(2048, './models/Resnet50/Resnet50.pth', self.use_cuda)
 
         if self.use_cuda:
             model = model.cuda()

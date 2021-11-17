@@ -63,7 +63,7 @@ class BirdsGAN(nn.Module):
     def __init__(self, emb_size, path_resnet, use_cuda=None):
         super(BirdsGAN, self).__init__()
         self.gen = BirdsGenerator(emb_size, use_cuda)
-        self.discriminator = Resnet34()
+        self.discriminator = Resnet50()
         self.discriminator.load_state_dict(torch.load(path_resnet))
         for p in self.discriminator.parameters():
             p.requires_grad = False
