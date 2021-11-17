@@ -12,6 +12,7 @@ from utils.data import data_transforms, data_transforms_val, pil_loader
 from utils.model import Net, VGG16_birds, Resnet34, AlexNet_birds, BirdNet, Resnet50
 from utils.vit import TransforBirds
 from utils.trainer import Trainer
+from utils.gan import BirdsGAN
 
 class Parser():
     def __init__(self, config):
@@ -25,19 +26,21 @@ class Parser():
             os.makedirs(os.path.join(self.path_out, self.config['Training']['experiment']))
         self.path_out = os.path.join(self.path_out, self.config['Training']['experiment'])
     def get_model(self):
-        model_name = self.config['Model']['name']
-        if model_name == 'Baseline':
+        self.model_name = self.config['Model']['name']
+        if self.model_name == 'Baseline':
             model = Net()
-        elif model_name == 'Resnet34':
+        elif self.model_name == 'Resnet34':
             model = Resnet34()
-        elif model_name == 'Resnet50':
+        elif self.model_name == 'Resnet50':
             model = Resnet50()
-        elif model_name == 'Alexnet':
+        elif self.model_name == 'Alexnet':
             model = AlexNet_birds()
-        elif model_name == 'BirdNet':
+        elif self.model_name == 'BirdNet':
             model = BirdNet()
-        elif model_name == 'TransforBirds':
+        elif self.model_name == 'TransforBirds':
             model = TransforBirds(256, 9, 'conv', self.use_cuda)
+        elif self.model_name == 'BirdsGAN':
+            model = BirdsGAN(2048, './models/Resnet34/Resnet34.pth', self.use_cuda)
 
         if self.use_cuda:
             model = model.cuda()
