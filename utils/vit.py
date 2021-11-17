@@ -82,8 +82,8 @@ class TransforBirds(nn.Module):
         else:
             self.encoder = ConvPatchEncoder(emb_size)
         self.nb_layers = nb_layers
-        self.transformers = nn.ModuleList([TransformersEncoder(2*emb_size, 4, nb_patches) for i in range(nb_layers)])
-        self.classifier = nn.Linear(2*emb_size, nclasses)
+        self.transformers = nn.ModuleList([TransformersEncoder(emb_size, 4, nb_patches) for i in range(nb_layers)])
+        self.classifier = nn.Linear(emb_size, nclasses)
 
     def forward(self, x):
         patches = self.patches(x)
@@ -94,11 +94,11 @@ class TransforBirds(nn.Module):
                 indices = indices.cuda()
             pos_emb = self.patch_embedding(indices)
             patch_emb = self.encoder(patches[:, i, :, :, :])
-            final_emb = torch.cat((pos_emb, patch_emb), dim=-1)
+            #final_emb = torch.cat((pos_emb, patch_emb), dim=-1)
+            final_emb = pos_emb + patch_emb
             first_layers_embeddings = (*first_layers_embeddings, final_emb)
         layers_embeddings = torch.stack(first_layers_embeddings, dim=1)
         for i in range(self.nb_layers):
-            layers_embeddings = self.transformers[i](layers_embeddings)+layers_embeddings
+            #layers_embeddings = self.transformers[i](layers_embeddings)+layers_embeddings
+            layers_embeddings = self.transformers[i](layers_embeddings)
         return self.classifier(layers_embeddings[:, 0, :])
-        #print(layers_embeddings.shape)
-        #exit(0)
