@@ -96,8 +96,22 @@ class Resnet50(nn.Module):
     def __init__(self):
         super(Resnet50, self).__init__()
         self.backbone = models.resnet50(pretrained=True)
-        for param in self.backbone.parameters():
-            param.requires_grad = False
+        #for param in self.backbone.parameters():
+        #    param.requires_grad = False
+        n_feat = self.backbone.fc.in_features
+        self.backbone.fc = nn.Sequential(
+          nn.Linear(n_feat, nclasses)
+        )
+        
+    def forward(self, x):
+        return self.backbone(x)
+
+class EfficientNetB7(nn.Module):
+    def __init__(self):
+        super(EfficientNetB7, self).__init__()
+        self.backbone = models.efficientnetb7(pretrained=True)
+        #for param in self.backbone.parameters():
+        #    param.requires_grad = False
         n_feat = self.backbone.fc.in_features
         self.backbone.fc = nn.Sequential(
           nn.Linear(n_feat, nclasses)
