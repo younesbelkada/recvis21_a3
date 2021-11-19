@@ -3,3 +3,4 @@ torchvision
 tqdm
 wandb
 pytorch-pretrained-vit
+plotly

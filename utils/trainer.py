@@ -5,7 +5,9 @@ import itertools
 
 import torch.nn as nn
 import numpy as np
+import plotly.graph_objs as go
 from sklearn.metrics import f1_score
+from sklearn.metrics import confusion_matrix
 from torch.autograd import Variable
 import torchvision.transforms as transforms
 
@@ -59,6 +61,39 @@ class Trainer():
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                     epoch, batch_idx * len(data), len(self.train_loader.dataset),
                     100. * batch_idx / len(self.train_loader), loss.data.item()))
+            break
+    def _log_confusion_matrix(self, y_pred, y_true):
+
+        confmatrix = confusion_matrix(y_pred, y_true, labels=range(len(self.class_names)))
+        confdiag = np.eye(len(confmatrix)) * confmatrix
+        np.fill_diagonal(confmatrix, 0)
+
+        confmatrix = confmatrix.astype('float')
+        n_confused = np.sum(confmatrix)
+        confmatrix[confmatrix == 0] = np.nan
+        confmatrix = go.Heatmap({'coloraxis': 'coloraxis1', 'x': self.class_names, 'y': self.class_names, 'z': confmatrix,
+                                 'hoverongaps':False, 'hovertemplate': 'Predicted %{y}<br>Instead of %{x}<br>On %{z} examples<extra></extra>'})
+
+        confdiag = confdiag.astype('float')
+        n_right = np.sum(confdiag)
+        confdiag[confdiag == 0] = np.nan
+        confdiag = go.Heatmap({'coloraxis': 'coloraxis2', 'x': self.class_names, 'y': self.class_names, 'z': confdiag,
+                               'hoverongaps':False, 'hovertemplate': 'Predicted %{y} just right<br>On %{z} examples<extra></extra>'})
+
+        fig = go.Figure((confdiag, confmatrix))
+        transparent = 'rgba(0, 0, 0, 0)'
+        n_total = n_right + n_confused
+        fig.update_layout({'coloraxis1': {'colorscale': [[0, transparent], [0, 'rgba(180, 0, 0, 0.05)'], [1, f'rgba(180, 0, 0, {max(0.2, (n_confused/n_total) ** 0.5)})']], 'showscale': False}})
+        fig.update_layout({'coloraxis2': {'colorscale': [[0, transparent], [0, f'rgba(0, 180, 0, {min(0.8, (n_right/n_total) ** 2)})'], [1, 'rgba(0, 180, 0, 1)']], 'showscale': False}})
+
+        xaxis = {'title':{'text':'y_true'}, 'showticklabels':False}
+        yaxis = {'title':{'text':'y_pred'}, 'showticklabels':False}
+
+        fig.update_layout(title={'text':'Confusion matrix', 'x':0.5}, paper_bgcolor=transparent, plot_bgcolor=transparent, xaxis=xaxis, yaxis=yaxis)
+        
+        return {'confusion_matrix': wandb.data_types.Plotly(fig)}
+
+
     def validation(self):
         self.model.eval()
         correct = 0
@@ -79,19 +114,24 @@ class Trainer():
 
                 predicted_labels.extend(pred.detach().cpu().numpy().tolist())
                 gt_labels.extend(target.detach().cpu().numpy().tolist())
-
+                break
             validation_loss /= len(self.val_loader.dataset)
             val_acc = 100. * correct / len(self.val_loader.dataset)
         f1_table = f1_score(gt_labels, predicted_labels, average=None)
         wandb.log({"val_loss": validation_loss, "val_acc":val_acc})
         predicted_labels = list(itertools.chain.from_iterable(predicted_labels))
-        cm = wandb.plot.confusion_matrix(
+        """cm = wandb.plot.confusion_matrix(
             probs=None,
             y_true = gt_labels,
             preds = predicted_labels,
             class_names = self.class_names
         )
-        wandb.log({"conf_mat":cm})
+        wandb.log({"conf_mat":cm})"""
+        wandb.log(self._log_confusion_matrix(predicted_labels, gt_labels), commit=False)
+        
+
+
+
         print('\nValidation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
             validation_loss, correct, len(self.val_loader.dataset),
             val_acc))
