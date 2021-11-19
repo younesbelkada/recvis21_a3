@@ -9,7 +9,7 @@ import torch.optim as optim
 from torchvision import datasets
 
 from utils.data import data_transforms, data_transforms_val, pil_loader
-from utils.model import Net, VGG16_birds, Resnet34, AlexNet_birds, BirdNet, Resnet50
+from utils.model import Net, VGG16_birds, Resnet34, AlexNet_birds, BirdNet, Resnet50, ViT_
 from utils.vit import TransforBirds
 from utils.trainer import Trainer
 from utils.gan import BirdsGAN
@@ -41,6 +41,10 @@ class Parser():
             model = TransforBirds(256, 9, 'conv', self.use_cuda)
         elif self.model_name == 'BirdsGAN':
             model = BirdsGAN(2048, './models/Resnet50/Resnet50.pth', self.use_cuda)
+        elif self.model_name == 'ViT':
+            model = ViT_()
+            
+            #exit(0)
 
         if self.use_cuda:
             model = model.cuda()

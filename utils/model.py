@@ -6,6 +6,7 @@ import numpy as np
 import torchvision.transforms as transforms
 import torchvision.models as models
 from PIL import Image
+from pytorch_pretrained_vit import ViT
 
 torch.manual_seed(0)
 nclasses = 20 
@@ -37,6 +38,18 @@ class Net(nn.Module):
         x = x.view(-1, 320)
         x = F.relu(self.fc1(x))
         return self.fc2(x)
+
+class ViT_(nn.Module):
+    def __init__(self):
+        super(ViT_, self).__init__()
+        self.model_name = 'B_16_imagenet1k'
+        self.model = ViT(self.model_name, pretrained=True)
+        self.model.fc = nn.Sequential(
+            nn.Linear(768, nclasses)
+        )
+    def forward(self, x):
+        return self.model(x)
+
 
 class VGG16_birds(nn.Module):
     def __init__(self):
