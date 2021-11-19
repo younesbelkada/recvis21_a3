@@ -61,7 +61,6 @@ class Trainer():
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                     epoch, batch_idx * len(data), len(self.train_loader.dataset),
                     100. * batch_idx / len(self.train_loader), loss.data.item()))
-            break
     def _log_confusion_matrix(self, y_pred, y_true):
 
         confmatrix = confusion_matrix(y_pred, y_true, labels=range(len(self.class_names)))
@@ -114,7 +113,6 @@ class Trainer():
 
                 predicted_labels.extend(pred.detach().cpu().numpy().tolist())
                 gt_labels.extend(target.detach().cpu().numpy().tolist())
-                break
             validation_loss /= len(self.val_loader.dataset)
             val_acc = 100. * correct / len(self.val_loader.dataset)
         f1_table = f1_score(gt_labels, predicted_labels, average=None)
