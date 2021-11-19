@@ -1,5 +1,6 @@
 import os
 import torch
+import operator
 from tqdm import tqdm
 import torch.nn as nn
 
@@ -8,7 +9,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets
 
-from utils.data import data_transforms, data_transforms_val, pil_loader
+from utils.data import data_transforms, data_transforms_val, data_transforms_yolo, data_transforms_yolo_val, pil_loader
 from utils.model import Net, VGG16_birds, Resnet34, AlexNet_birds, BirdNet, Resnet50, ViT_
 from utils.vit import TransforBirds
 from utils.trainer import Trainer
@@ -58,18 +59,20 @@ class Parser():
         self.optimizer_name = self.config['Training']['optimizer_name']
         self.augment = self.config['Dataset'].getboolean('augment')
         if self.augment:
-            self.train_loader = torch.utils.data.DataLoader(torch.utils.data.ConcatDataset([datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'train_images'), transform=data_transforms), datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data']+'_yolo','train_images'), transform=data_transforms)]), batch_size=self.batch_size, shuffle=True, num_workers=1)
+            self.train_loader = torch.utils.data.DataLoader(torch.utils.data.ConcatDataset([datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'train_images'), transform=data_transforms), datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data']+'_yolo','train_images'), transform=data_transforms_yolo)]), batch_size=self.batch_size, shuffle=True, num_workers=1)
+            #self.val_loader = torch.utils.data.DataLoader(torch.utils.data.ConcatDataset([datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'val_images'), transform=data_transforms_val), datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data']+'_yolo','val_images'), transform=data_transforms_yolo_val)]), batch_size=self.batch_size, shuffle=True, num_workers=1)
         else:
             self.train_loader = torch.utils.data.DataLoader(datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'train_images'), transform=data_transforms), batch_size=self.batch_size, shuffle=True, num_workers=1)
         self.val_loader = torch.utils.data.DataLoader(datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'val_images'), transform=data_transforms_val), batch_size=self.batch_size, shuffle=False, num_workers=1)
-        
-    
+        self.class_names = datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'train_images')).class_to_idx
+        self.class_names = sorted(self.class_names.items(), key=lambda kv: kv[1])
+        self.class_names = [item[0] for item in self.class_names]
     def run(self):
         if self.optimizer_name == 'sgd':
             self.optimizer = optim.SGD(filter(lambda p: p.requires_grad, self.model.parameters()), lr=float(self.config['Training']['learning_rate']), momentum=float(self.config['Training']['momentum']))
         else:
             self.optimizer = optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), lr=self.learning_rate)
-        trainer = Trainer(self.model, self.train_loader, self.val_loader, self.optimizer, self.epochs, self.use_cuda, int(self.config['Training']['log_intervals']), self.path_out)
+        trainer = Trainer(self.model, self.train_loader, self.val_loader, self.optimizer, self.epochs, self.use_cuda, int(self.config['Training']['log_intervals']), self.path_out, self.class_names)
         trainer.run()
     
     def run_eval(self):

@@ -30,6 +30,26 @@ data_transforms = transforms.Compose([
     #                             std=[0.229, 0.224, 0.225])
 ])
 
+data_transforms_yolo = transforms.Compose([
+    SquarePad(),
+    transforms.Resize((384, 384)), # 384 x 384 # take the cropped images # 512,512 + center crop 384
+    transforms.AutoAugment(transforms.AutoAugmentPolicy.IMAGENET), # random flip
+    transforms.ToTensor(),
+    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+    #transforms.Normalize(mean=[0.485, 0.456, 0.406],
+    #                             std=[0.229, 0.224, 0.225])
+])
+
+data_transforms_yolo_val = transforms.Compose([
+    SquarePad(),
+    transforms.Resize((384, 384)), # 384 x 384 # take the cropped images # 512,512 + center crop 384
+    transforms.AutoAugment(transforms.AutoAugmentPolicy.IMAGENET), # random flip
+    transforms.ToTensor(),
+    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+    #transforms.Normalize(mean=[0.485, 0.456, 0.406],
+    #                             std=[0.229, 0.224, 0.225])
+])
+
 data_transforms_val = transforms.Compose([
     #SquarePad(),
     transforms.Resize((384, 384)),
