@@ -62,10 +62,10 @@ class Parser():
         self.augment = self.config['Dataset'].getboolean('augment')
         if self.augment:
             self.train_loader = torch.utils.data.DataLoader(torch.utils.data.ConcatDataset([datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'train_images'), transform=data_transforms), datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data']+'_yolo','train_images'), transform=data_transforms_yolo)]), batch_size=self.batch_size, shuffle=True, num_workers=1)
-            #self.val_loader = torch.utils.data.DataLoader(torch.utils.data.ConcatDataset([datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'val_images'), transform=data_transforms_val), datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data']+'_yolo','val_images'), transform=data_transforms_yolo_val)]), batch_size=self.batch_size, shuffle=True, num_workers=1)
+            self.val_loader = torch.utils.data.DataLoader(torch.utils.data.ConcatDataset([datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'val_images'), transform=data_transforms_val), datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data']+'_yolo','val_images'), transform=data_transforms_yolo_val)]), batch_size=self.batch_size, shuffle=True, num_workers=1)
         else:
             self.train_loader = torch.utils.data.DataLoader(datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'train_images'), transform=data_transforms), batch_size=self.batch_size, shuffle=True, num_workers=1)
-        self.val_loader = torch.utils.data.DataLoader(datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'val_images'), transform=data_transforms_val), batch_size=self.batch_size, shuffle=False, num_workers=1)
+            self.val_loader = torch.utils.data.DataLoader(datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'val_images'), transform=data_transforms_val), batch_size=self.batch_size, shuffle=False, num_workers=1)
         self.class_names = datasets.ImageFolder(os.path.join(self.config['Dataset']['path_data'],'train_images')).class_to_idx
         self.class_names = sorted(self.class_names.items(), key=lambda kv: kv[1])
         self.class_names = [item[0] for item in self.class_names]
