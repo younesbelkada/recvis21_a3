@@ -120,34 +120,31 @@ class EfficientNetB7(nn.Module):
     def forward(self, x):
         return self.backbone(x)
 
+
+
 class BirdNet(nn.Module):
-    def __init__(self):
+    def __init__(self, path_resnet, path_vit):
         super(BirdNet, self).__init__()
-        self.patch_converter = Patches()
-        self.encoder = nn.Sequential(
-            nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3),
-            nn.MaxPool2d(2),
-            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3),
-            nn.MaxPool2d(2),
-            nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3),
-            nn.MaxPool2d(2),
-        )
-        self.fc = nn.Sequential(
-            nn.Linear(3200, 1028),
-            nn.BatchNorm1d(1028),
-            nn.Linear(1028, 64)
+        self.resnet50 = Resnet50()
+        self.resnet50.load_state_dict(torch.load(path_resnet))
+        
+        for p in self.resnet50.parameters()[:-1]:
+            p.requires_grad = False
+
+        self.vit = ViT_()
+        self.vit.load_state_dict(torch.load(path_vit))
+
+        for p in self.vit.parameters()[:-1]:
+            p.requires_grad = False
+
+        self.softmax = nn.Softmax()
+        self.predictor = nn.Sequential(
+            nn.Linear(40, nclasses, bias=False)
         )
 
-        self.fc_classification = nn.Sequential(
-            nn.Linear(1024, nclasses)
-        )
     def forward(self, x):
-        patches = self.patch_converter(x)
-        final_vector = ()
-        for i in range(patches.shape[1]):
-            feat_maps = self.encoder(patches[:, i, :, :, :])
-            flattened_feat_map = torch.flatten(feat_maps, start_dim=1)
-            encoded_feat_map = self.fc(flattened_feat_map)
-            final_vector = (*final_vector, encoded_feat_map)
-        final_vector = torch.cat(final_vector, dim=1)
-        return self.fc_classification(final_vector)
+        pred_resnet = self.softmax(self.resnet50(x))
+        pred_vit = self.softmax(self.vit(x))
+
+        out_tensor = torch.cat((pred_resnet, pred_vit), dim=-1)
+        return self.predictor(out_tensor)
