@@ -121,30 +121,86 @@ class EfficientNetB7(nn.Module):
         return self.backbone(x)
 
 
-
 class BirdNet(nn.Module):
     def __init__(self, path_resnet, path_vit):
         super(BirdNet, self).__init__()
+        print(path_resnet, path_vit)
         self.resnet50 = Resnet50()
         self.resnet50.load_state_dict(torch.load(path_resnet))
         
-        for p in self.resnet50.parameters()[:-1]:
-            p.requires_grad = False
+
+        #for p in self.resnet50.backbone.parameters():
+        #    p.requires_grad = False
 
         self.vit = ViT_()
+        #print(self.vit)
         self.vit.load_state_dict(torch.load(path_vit))
 
-        for p in self.vit.parameters()[:-1]:
+
+
+        for p in self.vit.model.transformer.parameters():
             p.requires_grad = False
 
-        self.softmax = nn.Softmax()
+        self.softmax = nn.Softmax(dim=-1)
         self.predictor = nn.Sequential(
             nn.Linear(40, nclasses, bias=False)
         )
 
     def forward(self, x):
-        pred_resnet = self.softmax(self.resnet50(x))
-        pred_vit = self.softmax(self.vit(x))
+        #pred_resnet = self.softmax(self.resnet50(x))
+        pred_resnet = self.resnet50(x)
+        #pred_resnet = self.softmax(self.resnet50(x))
+        #pred_vit = self.softmax(self.vit(x))
+        pred_vit = self.vit(x)
 
         out_tensor = torch.cat((pred_resnet, pred_vit), dim=-1)
         return self.predictor(out_tensor)
+
+class Identity(nn.Module):
+    def __init__(self):
+        super(Identity, self).__init__()
+        
+    def forward(self, x):
+        return x
+
+class BirdNet2(nn.Module):
+    def __init__(self):
+        super(BirdNet2, self).__init__()
+        
+        self.vit = ViT_()
+        self.vit.model.fc = Identity()
+        #print(self.vit.model.transformer)
+        #exit(0)
+
+        self.context_encoder = nn.Sequential(
+            nn.Conv2d(3, 32, 7),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Conv2d(32, 64, 7),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Conv2d(64, 128, 7),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.AdaptiveMaxPool2d(5),
+        )
+        self.context_encoder_fc = nn.Sequential(
+            nn.Linear(5*5*128, 768),
+            nn.ReLU()
+        )
+
+        self.fc = nn.Sequential(
+            nn.LayerNorm(768*2, eps=1e-06, elementwise_affine=True),
+            nn.Linear(768*2, 256),
+            nn.GELU(),
+            nn.Linear(256, nclasses)
+        )
+
+    def forward(self, x):
+        pred_vit = self.vit.model(x)
+        pred_encoder = torch.flatten(self.context_encoder(x), start_dim=1)
+        pred_encoder = self.context_encoder_fc(pred_encoder)
+        out_tensor = torch.cat((pred_encoder, pred_vit), dim=-1)
+        return self.fc(out_tensor)

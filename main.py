@@ -17,6 +17,9 @@ args = parser.parse_args()
 config = configparser.ConfigParser()
 config.read(args.file)
 
+# earnest-mountain-236
+# ViT + ResNet = 0.8670
+
 parser = Parser(config)
 parser.parse()
 

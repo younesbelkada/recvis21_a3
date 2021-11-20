@@ -118,18 +118,8 @@ class Trainer():
         f1_table = f1_score(gt_labels, predicted_labels, average=None)
         wandb.log({"val_loss": validation_loss, "val_acc":val_acc})
         predicted_labels = list(itertools.chain.from_iterable(predicted_labels))
-        """cm = wandb.plot.confusion_matrix(
-            probs=None,
-            y_true = gt_labels,
-            preds = predicted_labels,
-            class_names = self.class_names
-        )
-        wandb.log({"conf_mat":cm})"""
         wandb.log(self._log_confusion_matrix(predicted_labels, gt_labels), commit=False)
-        
-
-
-
+    
         print('\nValidation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
             validation_loss, correct, len(self.val_loader.dataset),
             val_acc))
