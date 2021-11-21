@@ -1,37 +1,52 @@
-## Object recognition and computer vision 2021/2022
+# TrasnforBirds - An attempt for Context-aware Vision Transformers
 
+## Object Recognition and Computer Vision
 ### Assignment 3: Image classification 
 
 #### Requirements
-1. Install PyTorch from http://pytorch.org
 
-2. Run the following command to install additional dependencies
+Run the following command to install the dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
 #### Dataset
-We will be using a dataset containing 200 different classes of birds adapted from the [CUB-200-2011 dataset](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html).
-Download the training/validation/test images from [here](https://www.di.ens.fr/willow/teaching/recvis18orig/assignment3/bird_dataset.zip). The test image labels are not provided.
+
+Simply run 
+
+```bash
+sh build_data.sh
+```
+
+In order to automatically build the dataset (including our customly augmented dataset).
 
 #### Training and validating your model
-Run the script `main.py` to train your model.
 
-Modify `main.py`, `model.py` and `data.py` for your assignment, with an aim to make the validation score better.
+This code supports visualization through Wandb. If you don't want to use it, please specify it when running the main script.
 
-- By default the images are loaded and resized to 64x64 pixels and normalized to zero-mean and standard deviation of 1. See data.py for the `data_transforms`.
+You have **one** config file to edit. Please refer to the [training wiki](wiki/train.md) in order to understand each argument of the config file. After modifying the config file, run:
+```bash
+python main.py --file config.ini
+```
+Here are the results obtained on the public test set with each model:
+
+| Parameter                 |Description   |
+| :------------------------ |:-------------|
+| ```Resnet50```  | 0.7940 |
+| ```ViT``` | 0.8968 |
+| ```BirdNet``` | 0.8774 |
+| ```TransforBirds``` | 0.8968 |
 
 #### Evaluating your model on the test set
 
-As the model trains, model checkpoints are saved to files such as `model_x.pth` to the current working directory.
-You can take one of the checkpoints and run:
-
 ```
-python evaluate.py --data [data_dir] --model [model_file]
+python  main.py --file config.ini --mode eval
 ```
 
-That generates a file `kaggle.csv` that you can upload to the private kaggle competition website.
+That generates a csv file that you can upload to the private kaggle competition website.
+
+#### Wandb Visualization 
 
 #### Acknowledgments
 Adapted from Rob Fergus and Soumith Chintala https://github.com/soumith/traffic-sign-detection-homework.<br/>
