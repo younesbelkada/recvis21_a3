@@ -10,10 +10,8 @@ import torch.optim as optim
 from torchvision import datasets
 
 from utils.data import data_transforms, data_transforms_val, data_transforms_yolo, data_transforms_yolo_val, pil_loader
-from utils.model import Net, VGG16_birds, Resnet34, AlexNet_birds, BirdNet, Resnet50, ViT_, EfficientNetB7, BirdNet2
-from utils.vit import TransforBirds
+from utils.model import BirdNet, Resnet50, ViT_, TransforBirds
 from utils.trainer import Trainer
-from utils.gan import BirdsGAN
 
 class Parser():
     def __init__(self, config):
@@ -28,28 +26,14 @@ class Parser():
         self.path_out = os.path.join(self.path_out, self.config['Training']['experiment'])
     def get_model(self):
         self.model_name = self.config['Model']['name']
-        if self.model_name == 'Baseline':
-            model = Net()
-        elif self.model_name == 'Resnet34':
-            model = Resnet34()
-        elif self.model_name == 'Resnet50':
+        if self.model_name == 'Resnet50':
             model = Resnet50()
-        elif self.model_name == 'Alexnet':
-            model = AlexNet_birds()
         elif self.model_name == 'BirdNet':
             model = BirdNet()
         elif self.model_name == 'TransforBirds':
-            model = TransforBirds(256, 9, 'conv', self.use_cuda)
-        elif self.model_name == 'BirdsGAN':
-            model = BirdsGAN(2048, './models/Resnet50/Resnet50.pth', self.use_cuda)
-        elif self.model_name == 'EfficientNetB7':
-            model = EfficientNetB7()
+            model = TransforBirds()
         elif self.model_name == 'ViT':
             model = ViT_()
-        elif self.model_name == 'BirdNet2':
-            model = BirdNet2()
-            
-            #exit(0)
 
         if self.use_cuda:
             model = model.cuda()
