@@ -3,6 +3,11 @@
 ## Object Recognition and Computer Vision
 ### Assignment 3: Image classification 
 
+#### Overview
+
+Pytorch implementation of *TransforBirds - An attempt for a context aware ViT*. Model architecture below:
+![alt text](TransforBirds.png)
+
 #### Requirements
 
 Run the following command to install the dependencies
