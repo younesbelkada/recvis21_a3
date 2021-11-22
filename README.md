@@ -1,4 +1,4 @@
-# TrasnforBirds - An attempt for Context-aware Vision Transformers
+# TrasnforBirds - An attempt for a Context-aware Vision Transformers
 
 ## Object Recognition and Computer Vision
 ### Assignment 3: Image classification 
