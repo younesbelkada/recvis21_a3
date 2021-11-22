@@ -9,7 +9,6 @@ Pytorch implementation of *TransforBirds - An attempt for a context aware ViT*. 
 ![alt text](TransforBirds.png)
 In the context module, *BN2d* stands for 2d Batch Normalization, and *Sum* stands for summing the output with the downsampled output from the previous block (skip-connection).
 
-
 #### Requirements
 
 Run the following command to install the dependencies
@@ -55,6 +54,9 @@ That generates a csv file that you can upload to the private kaggle competition 
 
 #### Wandb Visualization 
 
+The wanbd log of our best model can be found [here](https://wandb.ai/younesbelkada/birds-classification/runs/34pmeo09).
+
 #### Acknowledgments
 Adapted from Rob Fergus and Soumith Chintala https://github.com/soumith/traffic-sign-detection-homework.<br/>
 Adaptation done by Gul Varol: https://github.com/gulvarol
+Credits to [TransFG](https://github.com/TACJu/TransFG) official repository for the model figure.
