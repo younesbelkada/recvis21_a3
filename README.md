@@ -7,6 +7,8 @@
 
 Pytorch implementation of *TransforBirds - An attempt for a context aware ViT*. Model architecture below:
 ![alt text](TransforBirds.png)
+In the context module, *BN2d* stands for 2d Batch Normalization, and *Sum* stands for summing the output with the downsampled output from the previous block (skip-connection).
+
 
 #### Requirements
 
