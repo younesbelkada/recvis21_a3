@@ -57,6 +57,6 @@ That generates a csv file that you can upload to the private kaggle competition 
 The wanbd log of our best model can be found [here](https://wandb.ai/younesbelkada/birds-classification/runs/34pmeo09).
 
 #### Acknowledgments
-Adapted from Rob Fergus and Soumith Chintala https://github.com/soumith/traffic-sign-detection-homework.<br/>
+* Adapted from Rob Fergus and Soumith Chintala https://github.com/soumith/traffic-sign-detection-homework.<br/>
 Adaptation done by Gul Varol: https://github.com/gulvarol
-Credits to [TransFG](https://github.com/TACJu/TransFG) official repository for the model figure.
+* Credits to [TransFG](https://github.com/TACJu/TransFG) official repository for the model figure.
